@@ -214,6 +214,9 @@ function AuraFlow() {
             })}
           </nav>
 
+          {/* Team presence */}
+          <TeamPresence />
+
           <div className="m-3 mt-2 rounded-2xl border border-gold/40 bg-gradient-to-br from-background to-secondary/60 p-4">
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-gold" />
@@ -224,6 +227,7 @@ function AuraFlow() {
             </p>
           </div>
         </aside>
+
 
         {/* Chat panel */}
         <section className="flex h-[calc(100vh-9rem)] flex-col overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
