@@ -214,6 +214,9 @@ function AuraFlow() {
             })}
           </nav>
 
+          {/* Team presence */}
+          <TeamPresence />
+
           <div className="m-3 mt-2 rounded-2xl border border-gold/40 bg-gradient-to-br from-background to-secondary/60 p-4">
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-gold" />
@@ -224,6 +227,7 @@ function AuraFlow() {
             </p>
           </div>
         </aside>
+
 
         {/* Chat panel */}
         <section className="flex h-[calc(100vh-9rem)] flex-col overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
@@ -345,3 +349,96 @@ function Typing() {
     </div>
   );
 }
+
+type Presence = "online" | "away" | "offline";
+
+const TEAM: { name: string; role: string; status: Presence; initials: string }[] = [
+  { name: "Aria Chen", role: "Product Lead", status: "online", initials: "AC" },
+  { name: "Marcus Vale", role: "Designer", status: "online", initials: "MV" },
+  { name: "Priya Nair", role: "Engineering", status: "away", initials: "PN" },
+  { name: "Diego Romero", role: "Marketing", status: "online", initials: "DR" },
+  { name: "Sana Patel", role: "Operations", status: "offline", initials: "SP" },
+  { name: "Lukas Weber", role: "Research", status: "offline", initials: "LW" },
+];
+
+const STATUS_META: Record<Presence, { label: string; dot: string; ring: string }> = {
+  online: { label: "Online", dot: "bg-emerald-500", ring: "ring-emerald-500/30" },
+  away: { label: "Away", dot: "bg-gold", ring: "ring-gold/30" },
+  offline: { label: "Offline", dot: "bg-muted-foreground/40", ring: "ring-border" },
+};
+
+function TeamPresence() {
+  const [open, setOpen] = useState(true);
+  const [filter, setFilter] = useState<"all" | Presence>("all");
+
+  const counts = TEAM.reduce(
+    (acc, m) => ((acc[m.status]++, acc)),
+    { online: 0, away: 0, offline: 0 } as Record<Presence, number>,
+  );
+  const list = filter === "all" ? TEAM : TEAM.filter((m) => m.status === filter);
+
+  return (
+    <div className="mx-3 mt-1 rounded-2xl border border-border/60 bg-card/60 overflow-hidden">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-sidebar-accent/40"
+      >
+        <div>
+          <p className="font-display text-sm">Team presence</p>
+          <p className="text-[11px] text-muted-foreground">
+            <span className="text-emerald-600 font-semibold">{counts.online} online</span>
+            {" · "}{counts.away} away · {counts.offline} offline
+          </p>
+        </div>
+        <span className={`text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}>⌄</span>
+      </button>
+
+      {open && (
+        <div className="border-t border-border/60 px-2 pb-2">
+          <div className="flex gap-1 px-2 py-2">
+            {(["all", "online", "away", "offline"] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`rounded-full px-2.5 py-1 text-[10px] uppercase tracking-wide transition-all ${
+                  filter === f
+                    ? "bg-gradient-aura text-primary-foreground shadow-aura"
+                    : "bg-secondary text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+          <ul className="max-h-60 space-y-0.5 overflow-y-auto pr-1">
+            {list.map((m) => {
+              const meta = STATUS_META[m.status];
+              return (
+                <li
+                  key={m.name}
+                  className="flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-sidebar-accent/50"
+                >
+                  <div className="relative">
+                    <div className={`grid h-9 w-9 place-items-center rounded-full bg-gradient-aura text-[11px] font-semibold text-primary-foreground ring-2 ${meta.ring}`}>
+                      {m.initials}
+                    </div>
+                    <span className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-card ${meta.dot}`} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium leading-tight">{m.name}</p>
+                    <p className="truncate text-[11px] text-muted-foreground">{m.role}</p>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground">{meta.label}</span>
+                </li>
+              );
+            })}
+            {list.length === 0 && (
+              <li className="px-3 py-4 text-center text-xs text-muted-foreground">No teammates {filter}.</li>
+            )}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
